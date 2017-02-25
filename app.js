@@ -5,8 +5,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var request = require('request');
+var routes = require('./routes');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 var server = app.listen(process.env.PORT || 3000, function () {
   console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
@@ -36,7 +39,6 @@ app.post('/webhook', function (req, res) {
         if (messagingEvent.optin) {
           // receivedAuthentication(messagingEvent);
         } else if (messagingEvent.message) {
-          console.log('received message');
           receivedMessage(messagingEvent);
         } else if (messagingEvent.delivery) {
           // receivedDeliveryConfirmation(messagingEvent);
@@ -60,6 +62,15 @@ app.post('/webhook', function (req, res) {
   }
 });
 
+function handleResponse(senderID, response) {
+  switch(response.messageType) {
+    case 'TEXT':
+    sendTextMessage(senderID, response.message);
+    break;
+  }
+  sendTypingOff(senderID);
+}
+
 function receivedMessage(event) {
   var senderID = event.sender.id;
   var recipientID = event.recipient.id;
@@ -82,19 +93,22 @@ function receivedMessage(event) {
 
   if (isEcho) {
     // Just logging message echoes to console
-    console.log("Received echo for message %s and app %d with metadata %s",
-      messageId, appId, metadata);
-    return;
+    console.log("Received echo for message %s and app %d with metadata %s", messageId, appId, metadata);
   } else if (quickReply) {
     var quickReplyPayload = quickReply.payload;
     console.log("Quick reply for message %s with payload %s",
       messageId, quickReplyPayload);
 
     sendTextMessage(senderID, "Quick reply tapped");
-    return;
+  }
+  else {
+    sendTypingOn(senderID);
+    routes.onTextMessage(messageText, function(response) {
+      handleResponse(senderID, response);
+    });
   }
 
-  if (messageText) {
+/*  if (messageText) {
 
     // If we receive a text message, check to see if it matches any special
     // keywords and send back the corresponding example. Otherwise, just echo
@@ -108,18 +122,6 @@ function receivedMessage(event) {
         sendGifMessage(senderID);
         break;
 
-      case 'audio':
-        sendAudioMessage(senderID);
-        break;
-
-      case 'video':
-        sendVideoMessage(senderID);
-        break;
-
-      case 'file':
-        sendFileMessage(senderID);
-        break;
-
       case 'button':
         sendButtonMessage(senderID);
         break;
@@ -128,38 +130,12 @@ function receivedMessage(event) {
         sendGenericMessage(senderID);
         break;
 
-      case 'receipt':
-        sendReceiptMessage(senderID);
-        break;
-
       case 'quick reply':
         sendQuickReply(senderID);
         break;
-
-      case 'read receipt':
-        sendReadReceipt(senderID);
-        break;
-
-      case 'typing on':
-        sendTypingOn(senderID);
-        break;
-
-      case 'typing off':
-        sendTypingOff(senderID);
-        break;
-
-      case 'account linking':
-        sendAccountLinking(senderID);
-        break;
-
-      default:
-        sendTextMessage(senderID, messageText);
     }
-  } else if (messageAttachments) {
-    sendTextMessage(senderID, "Message with attachment received");
-  }
+  } */
 }
-
 
 function receivedDeliveryConfirmation(event) {
   var senderID = event.sender.id;
@@ -194,7 +170,10 @@ function receivedPostback(event) {
 
   // When a postback is called, we'll send a message back to the sender to
   // let them know it was successful
-  sendTextMessage(senderID, "Postback called");
+
+  routes.onPostBack(payload, function(response){
+    handleResponse(senderID, response);
+  });
 }
 
 function sendImageMessage(recipientId) {
