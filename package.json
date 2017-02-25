@@ -1,0 +1,25 @@
+{
+  "name": "sun-devil-assistant",
+  "version": "0.0.0",
+  "description": "Facebook Messenger App for ASU",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ram-g-athreya/sun-devil-assistant.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ram-g-athreya/sun-devil-assistant/issues"
+  },
+  "homepage": "https://github.com/ram-g-athreya/sun-devil-assistant",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "dotenv": "^4.0.0",
+    "express": "^4.14.1",
+    "request": "^2.79.0"
+  }
+}
