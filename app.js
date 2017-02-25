@@ -6,10 +6,10 @@ var bodyParser = require('body-parser');
 var app = express();
 var request = require('request');
 var routes = require('./routes');
+var mysql = require('mysql');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 var server = app.listen(process.env.PORT || 3000, function () {
   console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
@@ -72,7 +72,10 @@ function handleResponse(senderID, response) {
     break;
     case 'GENERIC':
       sendGenericMessage(senderID, response.message);
-    break;  
+    break;
+    case 'QUICK_REPLIES':
+      sendQuickReply(senderID, response.message);
+    break;
   }
   sendTypingOff(senderID);
 }
@@ -105,11 +108,15 @@ function receivedMessage(event) {
     console.log("Quick reply for message %s with payload %s",
       messageId, quickReplyPayload);
 
-    sendTextMessage(senderID, "Quick reply tapped");
+    //sendTextMessage(senderID, "Quick reply tapped");
+  } else if(messageAttachments && messageAttachments[0].type == 'location') {
+    routes.storeUserLocation(senderID, messageAttachments[0].payload, function(response){
+      handleResponse(senderID, response);
+    });
   }
   else {
     sendTypingOn(senderID);
-    routes.onTextMessage(messageText, function(response) {
+    routes.onTextMessage(senderID, messageText, function(response) {
       handleResponse(senderID, response);
     });
   }
@@ -177,7 +184,7 @@ function receivedPostback(event) {
   // When a postback is called, we'll send a message back to the sender to
   // let them know it was successful
 
-  routes.onPostBack(payload, function(response){
+  routes.onPostBack(senderID, payload, function(response){
     handleResponse(senderID, response);
   });
 }
@@ -240,23 +247,7 @@ function sendButtonMessage(recipientId, buttons) {
     message: {
       attachment: {
         type: "template",
-        payload: buttons /*{
-          template_type: "button",
-          text: "This is test text",
-          buttons:[{
-            type: "web_url",
-            url: "https://www.oculus.com/en-us/rift/",
-            title: "Open Web URL"
-          }, {
-            type: "postback",
-            title: "Trigger Postback",
-            payload: "DEVELOPER_DEFINED_PAYLOAD"
-          }, {
-            type: "phone_number",
-            title: "Call Phone Number",
-            payload: "+16505551234"
-          }]
-        }*/
+        payload: buttons
       }
     }
   };
@@ -281,31 +272,12 @@ function sendGenericMessage(recipientId, payload) {
   callSendAPI(messageData);
 }
 
-function sendQuickReply(recipientId) {
+function sendQuickReply(recipientId, message) {
   var messageData = {
     recipient: {
       id: recipientId
     },
-    message: {
-      text: "What's your favorite movie genre?",
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"Action",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-        },
-        {
-          "content_type":"text",
-          "title":"Comedy",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
-        },
-        {
-          "content_type":"text",
-          "title":"Drama",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
-        }
-      ]
-    }
+    message: message
   };
 
   callSendAPI(messageData);
@@ -356,7 +328,6 @@ function callSendAPI(messageData) {
     qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
     method: 'POST',
     json: messageData
-
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       var recipientId = body.recipient_id;

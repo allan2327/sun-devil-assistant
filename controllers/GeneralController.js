@@ -1,6 +1,6 @@
 
 module.exports = {
-  hi: function(cb) {
+  hi: function(user_data, cb) {
     cb({
       messageType: 'GENERIC',
       message: {
@@ -21,7 +21,7 @@ module.exports = {
       }
     });
   },
-  fallback: function(cb) {
+  fallback: function(user_data, cb) {
     cb({
       messageType: 'TEXT',
       message: "I'm sorry, but I couldn't understand your question. I'm still learning, and will get better."
