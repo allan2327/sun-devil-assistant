@@ -1,11 +1,16 @@
 var general_controller = require(__dirname + '/controllers/GeneralController');
+var location_controller = require(__dirname + '/controllers/LocationController');
+
+function resolveEntities(entities) {
+  return entities;
+}
 
 module.exports = {
   onTextMessage: function(messageText, cb) {
     var wit = require(__dirname + '/wit');
     wit.makeRequest(messageText, function(res) {
-      if(res.entities && res.entities.intent) {
-        console.log(res.entities.intent[0], res.entities.intent[0].text);
+      if(res.entities) {
+        entities = resolveEntities(res.entities);
         switch(res.entities.intent[0].value) {
           case 'hi':
             general_controller.hi(cb);
@@ -13,24 +18,21 @@ module.exports = {
           case '':
           break;
           default:
-
+            general_controller.fallback(cb);
         }
       }
       else {
-
+        general_controller.fallback(cb);
       }
-
     });
-
-    // cb({
-    //   messageType: 'TEXT',
-    //   message: 'Hello World!'
-    // });
   },
   onPostBack: function(payload, cb) {
-    cb({
-      messageType: 'TEXT',
-      message: 'Hello World!'
-    });
+    console.log(payload);
+    payload = payload.split('|');
+    switch(payload[0]) {
+      case 'Location':
+        location_controller.route(payload, cb);
+      break;
+    }
   }
 };
