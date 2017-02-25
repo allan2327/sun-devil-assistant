@@ -65,8 +65,14 @@ app.post('/webhook', function (req, res) {
 function handleResponse(senderID, response) {
   switch(response.messageType) {
     case 'TEXT':
-    sendTextMessage(senderID, response.message);
+      sendTextMessage(senderID, response.message);
     break;
+    case 'BUTTONS':
+      sendButtonMessage(senderID, response.message);
+    break;
+    case 'GENERIC':
+      sendGenericMessage(senderID, response.message);
+    break;  
   }
   sendTypingOff(senderID);
 }
@@ -226,7 +232,7 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendButtonMessage(recipientId) {
+function sendButtonMessage(recipientId, buttons) {
   var messageData = {
     recipient: {
       id: recipientId
@@ -234,7 +240,7 @@ function sendButtonMessage(recipientId) {
     message: {
       attachment: {
         type: "template",
-        payload: {
+        payload: buttons /*{
           template_type: "button",
           text: "This is test text",
           buttons:[{
@@ -250,7 +256,7 @@ function sendButtonMessage(recipientId) {
             title: "Call Phone Number",
             payload: "+16505551234"
           }]
-        }
+        }*/
       }
     }
   };
@@ -259,7 +265,7 @@ function sendButtonMessage(recipientId) {
 }
 
 
-function sendGenericMessage(recipientId) {
+function sendGenericMessage(recipientId, payload) {
   var messageData = {
     recipient: {
       id: recipientId
@@ -267,38 +273,7 @@ function sendGenericMessage(recipientId) {
     message: {
       attachment: {
         type: "template",
-        payload: {
-          template_type: "generic",
-          elements: [{
-            title: "rift",
-            subtitle: "Next-generation virtual reality",
-            item_url: "https://www.oculus.com/en-us/rift/",
-            image_url: SERVER_URL + "/assets/rift.png",
-            buttons: [{
-              type: "web_url",
-              url: "https://www.oculus.com/en-us/rift/",
-              title: "Open Web URL"
-            }, {
-              type: "postback",
-              title: "Call Postback",
-              payload: "Payload for first bubble",
-            }],
-          }, {
-            title: "touch",
-            subtitle: "Your Hands, Now in VR",
-            item_url: "https://www.oculus.com/en-us/touch/",
-            image_url: SERVER_URL + "/assets/touch.png",
-            buttons: [{
-              type: "web_url",
-              url: "https://www.oculus.com/en-us/touch/",
-              title: "Open Web URL"
-            }, {
-              type: "postback",
-              title: "Call Postback",
-              payload: "Payload for second bubble",
-            }]
-          }]
-        }
+        payload: payload
       }
     }
   };

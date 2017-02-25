@@ -1,4 +1,4 @@
-
+var general_controller = require(__dirname + '/controllers/GeneralController');
 
 module.exports = {
   onTextMessage: function(messageText, cb) {
@@ -8,10 +8,7 @@ module.exports = {
         console.log(res.entities.intent[0], res.entities.intent[0].text);
         switch(res.entities.intent[0].value) {
           case 'hi':
-            cb({
-              messageType: 'TEXT',
-              message: 'Hi its nice to meet you'
-            });
+            general_controller.hi(cb);
           break;
           case '':
           break;
