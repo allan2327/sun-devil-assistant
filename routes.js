@@ -2,10 +2,71 @@ var general_controller = require(__dirname + '/controllers/GeneralController');
 var location_controller = require(__dirname + '/controllers/LocationController');
 
 function resolveEntities(entities) {
+  if(!entities.intent) {
+    if(entities.building) {
+      entities.intent = [{value: 'get_location'}];
+    }
+  }
   return entities;
 }
 
 module.exports = {
+  onTextMessage: function(senderID, messageText, cb) {
+    this.getUser(senderID, function(user_data) {
+      var wit = require(__dirname + '/wit');
+      wit.makeRequest(messageText, function(res) {
+        entities = resolveEntities(res.entities);
+        if(entities.intent) {
+          switch(res.entities.intent[0].value) {
+            case 'hi':
+              general_controller.hi(user_data, cb);
+            break;
+            case 'get_location':
+              location_controller.findBuildings(entities.building[0].value.split('|')[1], user_data, cb);
+            break;
+            default:
+              general_controller.fallback(user_data, cb);
+          }
+        }
+        else {
+          general_controller.fallback(user_data, cb);
+        }
+      });
+    });
+  },
+  onPostBack: function(senderID, payload, cb) {
+    this.getUser(senderID, function(user_data) {
+      payload = payload.split('|');
+      switch(payload[0]) {
+        case 'Location':
+          location_controller.route(user_data, payload, cb);
+        break;
+        case 'General':
+          general_controller.route(user_data, payload, cb);
+        break;
+      }
+    });
+  },
+  storeUserLocation: function(senderID, payload, cb) {
+    var me = this;
+    this.getUser(senderID, function(user_data) {
+        // Update Latitude and Longitude
+        var connection = require(__dirname + '/db')();
+        var coordinates = payload.coordinates;
+        connection.connect();
+        connection.query("update tbl_user set latitude=" + coordinates.lat + ', longitude=' + coordinates.long + ' where id_user=' + user_data.id_user, function(error, results, fields){
+          if(error) {
+            throw error;
+          }
+          user_data.latitude = coordinates.lat;
+          user_data.longitude = coordinates.long;
+          connection.end();
+          if(user_data.context) {
+            me.onPostBack(senderID, user_data.context, cb);
+          }
+        });
+    });
+  },
   getUser: function(senderID, cb) {
     var connection = require(__dirname + '/db')();
     connection.connect();
@@ -53,61 +114,6 @@ module.exports = {
           });
         }
       }
-    });
-  },
-  onTextMessage: function(senderID, messageText, cb) {
-    this.getUser(senderID, function(user_data) {
-      var wit = require(__dirname + '/wit');
-      wit.makeRequest(messageText, function(res) {
-        if(res.entities) {
-          entities = resolveEntities(res.entities);
-          switch(res.entities.intent[0].value) {
-            case 'hi':
-              general_controller.hi(user_data, cb);
-            break;
-            case '':
-            break;
-            default:
-              general_controller.fallback(user_data, cb);
-          }
-        }
-        else {
-          general_controller.fallback(user_data, cb);
-        }
-      });
-    });
-  },
-  onPostBack: function(senderID, payload, cb) {
-    this.getUser(senderID, function(user_data) {
-      payload = payload.split('|');
-      switch(payload[0]) {
-        case 'Location':
-          location_controller.route(user_data, payload, cb);
-        break;
-        case 'General':
-          general_controller.route(user_data, payload, cb);
-        break;  
-      }
-    });
-  },
-  storeUserLocation: function(senderID, payload, cb) {
-    var me = this;
-    this.getUser(senderID, function(user_data) {
-        // Update Latitude and Longitude
-        var connection = require(__dirname + '/db')();
-        var coordinates = payload.coordinates;
-        connection.connect();
-        connection.query("update tbl_user set latitude=" + coordinates.lat + ', longitude=' + coordinates.long + ' where id_user=' + user_data.id_user, function(error, results, fields){
-          if(error) {
-            throw error;
-          }
-          user_data.latitude = coordinates.lat;
-          user_data.longitude = coordinates.long;
-          connection.end();
-          if(user_data.context) {
-            me.onPostBack(senderID, user_data.context, cb);
-          }
-        });
     });
   }
 };

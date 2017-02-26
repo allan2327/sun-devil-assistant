@@ -8,29 +8,44 @@ module.exports = {
     }
   },
   hi: function(user_data, cb) {
-    cb({
+    var emoji = require('node-emoji');
+    var response = {
       messageType: 'GENERIC',
       message: {
         template_type: "generic",
         elements: [{
-          title: 'Hi how may I help you today?',
-          image_url: 'http://vignette4.wikia.nocookie.net/ncaa-football/images/7/7c/Arizona_State_Sun_Devils.jpg/revision/latest?cb=20140406132646',
+          title: 'Hi ' + user_data.first_name + ', how can I help you today?',
+          image_url: 'http://cdn.wallpapersafari.com/19/46/pmXzjc.jpg',
           buttons: [{
             type: 'postback',
-            title: 'Explore Events',
+            title: emoji.get('tada') + ' Explore Events',
             payload: 'General|Hi'
           }, {
             type: 'postback',
-            title: 'Find Directions',
+            title: emoji.get('city_sunrise') + ' Find Places',
             payload: 'Location|Start'
-          }, {
-            type: 'postback',
-            title: 'Popular Places',
-            payload: 'Location|Popular Places'
           }]
         }]
       }
-    });
+    };
+
+    if(user_data.bookmark_buildings) {
+      var item = {
+        title: 'Your Bookmarks',
+        image_url: 'https://s3.amazonaws.com/sundevil-assistant/images/bookmarks.jpg',
+        buttons: []
+      };
+      if(user_data.bookmark_buildings) {
+        item.buttons.push({
+          type: 'postback',
+          title: emoji.get('city_sunrise') + ' Places',
+          payload: 'Location|Find Buildings|' + user_data.bookmark_buildings
+        });
+      }
+
+      response.message.elements.push(item);
+    }
+    cb(response);
   },
   fallback: function(user_data, cb) {
     cb({
