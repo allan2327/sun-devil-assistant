@@ -1,5 +1,12 @@
 
 module.exports = {
+  route: function(user_data, payload, cb) {
+    switch(payload[1]) {
+      case 'Hi':
+        this.hi(user_data, cb);
+      break;
+    }
+  },
   hi: function(user_data, cb) {
     cb({
       messageType: 'GENERIC',
@@ -10,12 +17,16 @@ module.exports = {
           image_url: 'http://vignette4.wikia.nocookie.net/ncaa-football/images/7/7c/Arizona_State_Sun_Devils.jpg/revision/latest?cb=20140406132646',
           buttons: [{
             type: 'postback',
-            title: 'Get Directions',
+            title: 'Explore Events',
+            payload: 'General|Hi'
+          }, {
+            type: 'postback',
+            title: 'Find Directions',
             payload: 'Location|Start'
           }, {
             type: 'postback',
-            title: 'Explore Events',
-            payload: 'General|Hi'
+            title: 'Popular Places',
+            payload: 'Location|Popular Places'
           }]
         }]
       }

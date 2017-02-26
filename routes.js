@@ -84,6 +84,9 @@ module.exports = {
         case 'Location':
           location_controller.route(user_data, payload, cb);
         break;
+        case 'General':
+          general_controller.route(user_data, payload, cb);
+        break;  
       }
     });
   },

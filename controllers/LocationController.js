@@ -2,6 +2,9 @@
 module.exports = {
   route: function(user_data, payload, cb) {
     switch(payload[1]) {
+      case 'Popular Places':
+        
+      break;
       case 'Start':
         console.log(__dirname);
         if(user_data.latitude && user_data.longitude) {
