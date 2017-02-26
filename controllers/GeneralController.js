@@ -15,7 +15,7 @@ module.exports = {
         template_type: "generic",
         elements: [{
           title: 'Hi ' + user_data.first_name + ', how can I help you today?',
-          image_url: 'http://cdn.wallpapersafari.com/19/46/pmXzjc.jpg',
+          image_url: 'https://s3.amazonaws.com/sundevil-assistant/images/pitchfork.jpg',
           buttons: [{
             type: 'postback',
             title: emoji.get('tada') + ' Explore Events',
