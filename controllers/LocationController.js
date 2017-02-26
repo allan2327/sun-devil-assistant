@@ -131,6 +131,13 @@ module.exports = {
               payload: 'Location|Add Bookmark|' + results[index].name + '|' + results[index].id_building
             };
           }
+
+          response.message.elements[index].buttons.push({
+            type: 'web_url',
+            title: emoji.get('question') + ' Learn More',
+            url: results[index].web_url
+          });
+
           response.message.elements[index].buttons.push(item);
         }
         cb(response);

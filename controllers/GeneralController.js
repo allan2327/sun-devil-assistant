@@ -42,7 +42,6 @@ module.exports = {
           payload: 'Location|Find Buildings|' + user_data.bookmark_buildings
         });
       }
-
       response.message.elements.push(item);
     }
     cb(response);
