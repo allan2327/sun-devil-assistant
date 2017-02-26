@@ -11,7 +11,7 @@ var mysql = require('mysql');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var server = app.listen(process.env.PORT || 5000, function () {
+var server = app.listen(process.env.PORT || 3000, function () {
   console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
 });
 
@@ -75,6 +75,9 @@ function handleResponse(senderID, response) {
     break;
     case 'QUICK_REPLIES':
       sendQuickReply(senderID, response.message);
+    break;
+    case 'LIST':
+      sendListMessage(senderID, response.message);
     break;
   }
   sendTypingOff(senderID);
@@ -255,6 +258,21 @@ function sendButtonMessage(recipientId, buttons) {
   callSendAPI(messageData);
 }
 
+function sendListMessage(recipientId, payload) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      attachment: {
+        type: "template",
+        payload: payload
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
 
 function sendGenericMessage(recipientId, payload) {
   var messageData = {
