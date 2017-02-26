@@ -113,7 +113,7 @@ module.exports = {
             buttons: [{
               type: 'web_url',
               title: emoji.get('metro') + ' Show Route',
-              url: 'https://www.google.com/maps/dir/Current+Location/' + results[index].latitude + ',' + results[index].longitude
+              url: 'https://www.google.com/maps/?saddr=Current+Location&daddr=' + results[index].latitude + ',' + results[index].longitude
             }]
           });
 
