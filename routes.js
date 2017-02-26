@@ -2,7 +2,6 @@ var general_controller = require(__dirname + '/controllers/GeneralController');
 var location_controller = require(__dirname + '/controllers/LocationController');
 var event_controller = require(__dirname + '/controllers/EventsController');
 
-
 function resolveEntities(entities) {
   if(!entities.intent) {
     if(entities.building) {
@@ -27,9 +26,12 @@ module.exports = {
               location_controller.findBuildings(entities.building[0].value.split('|')[1], user_data, cb);
             break;
             case 'get_events':
-              console.log(entities);
-              event_controller.findEvents(entities.start_date[0].value,entities.start_date[0].grain, cb);
-            default:
+              event_controller.findEvents(null, entities.start_date[0].value,entities.start_date[0].grain, user_data, cb);
+            break;
+              case 'help':
+              general_controller.showHelp(user_data,cb);
+              break;
+                  default:
               general_controller.fallback(user_data, cb);
           }
         }
@@ -45,10 +47,13 @@ module.exports = {
       switch(payload[0]) {
         case 'Location':
           location_controller.route(user_data, payload, cb);
-        break;
+          break;
+        case 'Events':
+          event_controller.route(user_data, payload, cb);
+          break;
         case 'General':
           general_controller.route(user_data, payload, cb);
-        break;
+          break;
       }
     });
   },

@@ -11,7 +11,7 @@ var mysql = require('mysql');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var server = app.listen(process.env.PORT || 3000, function () {
+var server = app.listen(process.env.PORT || 5000, function () {
   console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
 });
 
@@ -359,6 +359,10 @@ request({
         "type":"postback",
         "title":"Start Over",
         "payload":"General|Hi"
+      }, {
+        type: "postback",
+        title: "Need Help?",
+        payload: "General|Help"
       }
     ]
   }
