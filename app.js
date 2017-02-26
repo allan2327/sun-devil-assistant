@@ -345,3 +345,37 @@ function callSendAPI(messageData) {
     }
   });
 }
+
+// Thread Settings
+request({
+  uri: "https://graph.facebook.com/v2.6/me/thread_settings",
+  qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
+  method: 'POST',
+  json: {
+    "setting_type" : "call_to_actions",
+    "thread_state" : "existing_thread",
+    "call_to_actions": [
+      {
+        "type":"postback",
+        "title":"Start Over",
+        "payload":"General|Hi"
+      }
+    ]
+  }
+});
+
+// Get Started Button
+request({
+  uri: "https://graph.facebook.com/v2.6/me/thread_settings",
+  qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
+  method: 'POST',
+  json: {
+    "setting_type" : "call_to_actions",
+    "thread_state" : "new_thread",
+    "call_to_actions": [
+      {
+        "payload":"General|Hi"
+      }
+    ]
+  }
+});
