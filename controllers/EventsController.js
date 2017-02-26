@@ -125,8 +125,6 @@ module.exports = {
                     subtitle = emoji.get('calendar') + ' ' + moment(date).format('Do MMM YYYY') + '\n\n' +
                         emoji.get('alarm_clock') + ' ' + results[index].time;
 
-                        //results[index].description.length <= 80 ? results[index].description : results[index].description.slice(0, 77) + '...';
-
                     response.message.elements.push({
                         title: results[index].name,
                         subtitle: subtitle,
@@ -135,7 +133,7 @@ module.exports = {
                         buttons: [{
                             type: 'postback',
                             title: emoji.get('japanese_castle') + ' Get Venue',
-                            payload: 'Location|Find Buildings|' + results[index].id_event
+                            payload: 'Location|Find Buildings|' + results[index].id_building
                         }]
                     });
 
