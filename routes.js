@@ -1,5 +1,7 @@
 var general_controller = require(__dirname + '/controllers/GeneralController');
 var location_controller = require(__dirname + '/controllers/LocationController');
+var event_controller = require(__dirname + '/controllers/EventsController');
+
 
 function resolveEntities(entities) {
   if(!entities.intent) {
@@ -24,6 +26,9 @@ module.exports = {
             case 'get_location':
               location_controller.findBuildings(entities.building[0].value.split('|')[1], user_data, cb);
             break;
+            case 'get_events':
+              console.log(entities);
+              event_controller.findEvents(entities.start_date[0].value,entities.start_date[0].grain, cb);
             default:
               general_controller.fallback(user_data, cb);
           }
